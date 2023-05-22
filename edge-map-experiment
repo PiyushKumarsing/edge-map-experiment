@@ -1,0 +1,39 @@
+import cv2
+import numpy as np
+import tensorflow as tf
+import numpy as np
+from PIL import Image
+
+imager = cv2.imread('/content/Untitled design (1).png')
+
+grey_img = cv2.cvtColor(imager, cv2.COLOR_BGR2GRAY)
+
+invert = cv2.bitwise_not(grey_img)  
+
+blur = cv2.GaussianBlur(invert, (21, 21), 0)
+
+invertedblur = cv2.bitwise_not(blur)
+
+sketch = cv2.divide(grey_img, invertedblur, scale=256.0)
+
+cv2.imwrite("sketch.png", sketch)
+
+path = "/content/sketch.png"
+Load_image = tf.keras.preprocessing.image.load_img(path)
+Load_image
+
+image_bytes = tf.io.read_file("/content/sketch.png")
+image = tf.image.decode_image(image_bytes)
+image = tf.cast(image, tf.float64)
+image = tf.expand_dims(image, 0)
+
+
+image = tf.random.uniform( minval=100,
+  maxval=200, shape=[1, 7, 7, 3], dtype=tf.float32)
+sobel = tf.image.sobel_edges(image)
+sobel_y = np.asarray(sobel[0, :, :, :, 0]) # sobel in y-direction
+sobel_x = np.asarray(sobel[0, :, :, :, 1]) # sobel in x-direction
+
+Image.fromarray(sobel_y[...,0] / 3 + 0.1).show()
+Image.fromarray(sobel_x[...,0] / 3 + 0.1).show() 
+#Image.fromarray(sobel_y[...,0] / 4 + 0.5).show()
